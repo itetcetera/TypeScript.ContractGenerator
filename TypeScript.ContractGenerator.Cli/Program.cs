@@ -20,13 +20,19 @@ namespace SkbKontur.TypeScript.ContractGenerator.Cli
 
         private static void Process(Options options)
         {
+#if NETCOREAPP
             GenerateByOptions(options);
 
             if (!options.Watch)
                 return;
 
             WatchDirectory(Path.GetDirectoryName(options.Assembly), Debounce((source, e) => GenerateByOptions(options), 1000));
+#else
+            Generate(Assembly.LoadFrom(options.Assembly), options);
+#endif
         }
+
+#if NETCOREAPP
 
         private static FileSystemEventHandler Debounce(FileSystemEventHandler func, int milliseconds = 1000)
         {
@@ -92,15 +98,22 @@ namespace SkbKontur.TypeScript.ContractGenerator.Cli
 
             alcWeakRef = new WeakReference(alc, trackResurrection : true);
 
-            var customTypeGenerator = GetSingleImplementation<ICustomTypeGenerator>(targetAssembly);
-            var typesProvider = GetSingleImplementation<ITypesProvider>(targetAssembly);
+            Generate(targetAssembly, options);
+
+            alc.Unload();
+        }
+
+#endif
+
+        private static void Generate(Assembly assembly, Options options)
+        {
+            var customTypeGenerator = GetSingleImplementation<ICustomTypeGenerator>(assembly);
+            var typesProvider = GetSingleImplementation<ITypesProvider>(assembly);
             if (customTypeGenerator == null || typesProvider == null)
                 return;
 
             var typeGenerator = new TypeScriptGenerator(options.ToTypeScriptGenerationOptions(), customTypeGenerator, typesProvider);
             typeGenerator.GenerateFiles(options.OutputDirectory);
-
-            alc.Unload();
         }
 
         private static T GetSingleImplementation<T>(Assembly assembly)

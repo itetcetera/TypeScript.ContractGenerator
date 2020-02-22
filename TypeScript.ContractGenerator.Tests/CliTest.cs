@@ -9,17 +9,26 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests
     public class CliTest
     {
         private static readonly string pathToSlnDirectory = $"{TestContext.CurrentContext.TestDirectory}/../../../../";
-        private static readonly string pathToAspNetCoreExampleGeneratorAssemblyDirectory = $"{pathToSlnDirectory}/AspNetCoreExample.Generator/bin/Debug/netcoreapp3.1";
-        private static readonly string pathToCliDirectory = $"{pathToSlnDirectory}/TypeScript.ContractGenerator.Cli/bin/Debug/netcoreapp3.1";
+        private static readonly string pathToAspNetCoreExampleGeneratorAssemblyDirectory = $"{pathToSlnDirectory}/AspNetCoreExample.Generator/bin/Debug";
+        private static readonly string pathToCliDirectory = $"{pathToSlnDirectory}/TypeScript.ContractGenerator.Cli/bin/Debug";
 
-        [Test]
-        public void CliGenerated()
+        [TestCase("net48")]
+#if NETCOREAPP
+        [TestCase("netcoreapp3.1")]
+#endif
+        public void CliGenerated(string framework)
         {
+#if NETCOREAPP
+            const string toolFramework = "netcoreapp3.1";
+#else
+            const string toolFramework = "net48";
+#endif
             BuildProjectByPath($"{pathToSlnDirectory}/AspNetCoreExample.Generator/AspNetCoreExample.Generator.csproj");
             BuildProjectByPath($"{pathToSlnDirectory}/TypeScript.ContractGenerator.Cli/TypeScript.ContractGenerator.Cli.csproj");
 
-            RunCmdCommand($"dotnet {pathToCliDirectory}/SkbKontur.TypeScript.ContractGenerator.Cli.dll " +
-                          $"-a {pathToAspNetCoreExampleGeneratorAssemblyDirectory}/AspNetCoreExample.Generator.dll " +
+            var extension = framework == "net48" ? "exe" : "dll";
+            RunCmdCommand($"{pathToCliDirectory}/{toolFramework}/SkbKontur.TypeScript.ContractGenerator.Cli.exe " +
+                          $"-a {pathToAspNetCoreExampleGeneratorAssemblyDirectory}/{framework}/AspNetCoreExample.Generator.{extension} " +
                           $"-o {TestContext.CurrentContext.TestDirectory}/cliOutput " +
                           "--nullabilityMode Optimistic " +
                           "--lintMode TsLint " +

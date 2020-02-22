@@ -1,4 +1,7 @@
-﻿using System;
+﻿
+#if NETCOREAPP
+
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -30,3 +33,5 @@ namespace SkbKontur.TypeScript.ContractGenerator.Cli
         private readonly AssemblyDependencyResolver resolver;
     }
 }
+
+#endif
