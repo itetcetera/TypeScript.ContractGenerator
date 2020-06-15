@@ -20,7 +20,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests.CustomTypeGenerators
             return "";
         }
 
-        public ITypeBuildingContext ResolveType(string initialUnitPath, ITypeGenerator typeGenerator, ITypeInfo type, ITypeScriptUnitFactory unitFactory)
+        public ITypeBuildingContext? ResolveType(string initialUnitPath, ITypeGenerator typeGenerator, ITypeInfo type, ITypeScriptUnitFactory unitFactory)
         {
             return null;
         }
@@ -36,7 +36,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests.CustomTypeGenerators
                     {
                         Name = propertyInfo.Name.ToLowerCamelCase(),
                         Optional = false,
-                        Type = new TypeScriptStringLiteralType(value),
+                        Type = new TypeScriptStringLiteralType(value!),
                     };
             }
 
@@ -48,7 +48,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests.CustomTypeGenerators
             var type = ((TypeInfo)typeInfo).Type;
             var property = ((PropertyWrapper)propertyInfo).Property;
             if (type == typeof(EnumWithConstGetterContainingRootType) && property.PropertyType.IsEnum && !property.CanWrite)
-                return property.GetMethod.Invoke(Activator.CreateInstance(type), null).ToString();
+                return property.GetMethod?.Invoke(Activator.CreateInstance(type), null)?.ToString();
             return null;
         }
 
@@ -58,7 +58,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests.CustomTypeGenerators
             if (!typeInfo.Equals(TypeInfo.From<EnumWithConstGetterContainingRootType>()) || !propertyInfo.PropertyType.IsEnum || property.SetMethod != null)
                 return null;
 
-            var syntaxNode = property.GetMethod.DeclaringSyntaxReferences.Single().GetSyntax();
+            var syntaxNode = property.GetMethod?.DeclaringSyntaxReferences.Single().GetSyntax();
             if (syntaxNode is ArrowExpressionClauseSyntax arrowExpression && arrowExpression.Expression is MemberAccessExpressionSyntax memberAccess)
             {
                 if (memberAccess.Expression is IdentifierNameSyntax identifier && identifier.Identifier.Text == propertyInfo.PropertyType.Name)

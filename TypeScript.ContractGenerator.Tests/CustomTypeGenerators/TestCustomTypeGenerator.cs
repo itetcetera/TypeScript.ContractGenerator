@@ -49,7 +49,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests.CustomTypeGenerators
                 {
                     Name = propertyInfo.Name.ToLowerCamelCase(),
                     Optional = false,
-                    Type = GetConstEnumType(typeGenerator, unit, propertyInfo, value),
+                    Type = GetConstEnumType(typeGenerator, unit, propertyInfo, value!),
                 };
         }
 
@@ -62,7 +62,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests.CustomTypeGenerators
         {
             value = typeInfo is TypeInfo
                         ? GetValueFromPropertyInfo(typeInfo, propertyInfo)
-                        : GetValueFromPropertySymbol(typeInfo, propertyInfo);
+                        : GetValueFromPropertySymbol(propertyInfo);
             return !string.IsNullOrEmpty(value);
         }
 
@@ -74,17 +74,17 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests.CustomTypeGenerators
             var hasInferAttribute = property.GetCustomAttributes<InferValueAttribute>(true).Any();
             if (!property.PropertyType.IsEnum || property.CanWrite || !hasDefaultConstructor || !hasInferAttribute)
                 return null;
-            return property.GetMethod.Invoke(Activator.CreateInstance(type), null).ToString();
+            return property.GetMethod?.Invoke(Activator.CreateInstance(type), null)?.ToString();
         }
 
-        private static string? GetValueFromPropertySymbol(ITypeInfo typeInfo, IPropertyInfo propertyInfo)
+        private static string? GetValueFromPropertySymbol(IPropertyInfo propertyInfo)
         {
             var property = ((RoslynPropertyInfo)propertyInfo).PropertySymbol;
             var hasInferAttribute = propertyInfo.GetAttributes(TypeInfo.From<InferValueAttribute>()).Any();
             if (!hasInferAttribute || !propertyInfo.PropertyType.IsEnum || property.SetMethod != null)
                 return null;
 
-            var syntaxNode = property.GetMethod.DeclaringSyntaxReferences.Single().GetSyntax();
+            var syntaxNode = property.GetMethod?.DeclaringSyntaxReferences.Single().GetSyntax();
             if (syntaxNode is ArrowExpressionClauseSyntax arrowExpression && arrowExpression.Expression is MemberAccessExpressionSyntax memberAccess)
             {
                 if (memberAccess.Expression is IdentifierNameSyntax identifier && identifier.Identifier.Text == propertyInfo.PropertyType.Name)

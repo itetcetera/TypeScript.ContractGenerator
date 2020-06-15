@@ -25,12 +25,12 @@ namespace SkbKontur.TypeScript.ContractGenerator.Cli
             if (!options.Watch)
                 return;
 
-            WatchDirectory(Path.GetDirectoryName(options.Assembly), Debounce((source, e) => GenerateByOptions(options), 1000));
+            WatchDirectory(Path.GetDirectoryName(options.Assembly)!, Debounce((source, e) => GenerateByOptions(options), 1000));
         }
 
         private static FileSystemEventHandler Debounce(FileSystemEventHandler func, int milliseconds = 1000)
         {
-            CancellationTokenSource cancelTokenSource = null;
+            CancellationTokenSource? cancelTokenSource = null;
             return (arg1, arg2) =>
                 {
                     cancelTokenSource?.Cancel();
@@ -64,7 +64,9 @@ namespace SkbKontur.TypeScript.ContractGenerator.Cli
             watcher.EnableRaisingEvents = true;
 
             Console.WriteLine("Press 'q' to quit");
-            while (Console.Read() != 'q') ;
+            while (Console.Read() != 'q')
+            {
+            }
         }
 
         private static void GenerateByOptions(Options o)
@@ -73,7 +75,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Cli
 
             ExecuteAndUnload(Path.GetFullPath(o.Assembly), out var testAlcWeakRef, o);
 
-            // это нужно для того чтобы сборка из AssemblyLoadContext была выгруженна
+            // это нужно для того чтобы сборка из AssemblyLoadContext была выгружена
             // https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability?view=netcore-3.1
             for (var i = 0; testAlcWeakRef.IsAlive && i < 10; i++)
             {

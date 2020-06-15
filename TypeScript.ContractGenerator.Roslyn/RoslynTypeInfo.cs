@@ -35,7 +35,9 @@ namespace SkbKontur.TypeScript.ContractGenerator.Roslyn
 
         public static ITypeInfo From(ITypeSymbol typeSymbol)
         {
-            return typeSymbol == null ? null : new RoslynTypeInfo(typeSymbol);
+            if (typeSymbol == null)
+                throw new ArgumentNullException(nameof(typeSymbol));
+            return new RoslynTypeInfo(typeSymbol);
         }
 
         public IAttributeInfo[] GetAttributes(bool inherit)
@@ -48,7 +50,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Roslyn
 
         public string Name => TypeSymbol.MetadataName;
         public string FullName => TypeSymbol.Name;
-        public string Namespace => IsArray ? "System" : TypeSymbol.ContainingNamespace?.ToString();
+        public string Namespace => IsArray ? "System" : TypeSymbol.ContainingNamespace?.ToString() ?? string.Empty;
         public bool IsEnum => BaseType != null && BaseType.Equals(TypeInfo.From<Enum>());
         public bool IsValueType => IsEnum || TypeSymbol.IsValueType;
         public bool IsArray => TypeSymbol.TypeKind == TypeKind.Array;
@@ -58,7 +60,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Roslyn
         public bool IsGenericType => TypeSymbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.IsGenericType;
         public bool IsGenericParameter => TypeSymbol.TypeKind == TypeKind.TypeParameter;
         public bool IsGenericTypeDefinition => IsGenericType && TypeSymbol.IsDefinition;
-        public ITypeInfo BaseType => From(TypeSymbol.BaseType);
+        public ITypeInfo? BaseType => TypeSymbol.BaseType == null ? null : From(TypeSymbol.BaseType);
         public IAttributeProvider? Member { get; }
         public IAssemblyInfo Assembly => new RoslynAssemblyInfo(TypeSymbol.ContainingAssembly);
 
@@ -128,14 +130,14 @@ namespace SkbKontur.TypeScript.ContractGenerator.Roslyn
         {
             if (TypeSymbol is INamedTypeSymbol namedTypeSymbol)
                 return new RoslynTypeInfo(namedTypeSymbol.OriginalDefinition);
-            return null;
+            throw new InvalidOperationException($"Type {FullName} is not a generic type");
         }
 
         public ITypeInfo GetElementType()
         {
             if (TypeSymbol is IArrayTypeSymbol arrayTypeSymbol)
                 return new RoslynTypeInfo(arrayTypeSymbol.ElementType, NullabilityInfo.ForItem());
-            return null;
+            throw new InvalidOperationException($"Type {FullName} is not an array type");
         }
 
         public ITypeInfo WithMemberInfo(IAttributeProvider memberInfo)

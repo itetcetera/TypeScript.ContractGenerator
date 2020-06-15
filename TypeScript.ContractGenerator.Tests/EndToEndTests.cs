@@ -52,7 +52,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests
         public void GenerateFilesTest(Type type)
         {
             var typesProvider = GetTypesProvider<TTypesProvider>(typeof(CommonUsingRootType), typeof(CommonUsingRootType2), typeof(CommonUsingRootType3));
-            GenerateFiles((ICustomTypeGenerator)Activator.CreateInstance(type), $"{type.Name}.Actual", typesProvider);
+            GenerateFiles((ICustomTypeGenerator)Activator.CreateInstance(type)!, $"{type.Name}.Actual", typesProvider);
             CheckDirectoriesEquivalence($"Files/{type.Name}.Expected", $"{type.Name}.Actual");
         }
 
@@ -65,7 +65,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests
         public void CustomGeneratorTest(Type rootType, Type type, string expectedFileName)
         {
             var typesProvider = GetTypesProvider<TTypesProvider>(rootType);
-            var generatedCode = GenerateCode(TypeScriptGenerationOptions.Default, (ICustomTypeGenerator)Activator.CreateInstance(type), typesProvider).Single();
+            var generatedCode = GenerateCode(TypeScriptGenerationOptions.Default, (ICustomTypeGenerator)Activator.CreateInstance(type)!, typesProvider).Single();
             var expectedCode = GetExpectedCode($"CustomGenerator/{expectedFileName}");
             generatedCode.Diff(expectedCode).ShouldBeEmpty();
         }

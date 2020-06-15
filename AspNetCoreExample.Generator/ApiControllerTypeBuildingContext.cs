@@ -71,7 +71,7 @@ namespace AspNetCoreExample.Generator
         protected override string BuildRoute(ITypeInfo controllerType, IMethodInfo methodInfo)
         {
             var routeTemplate = methodInfo.GetAttributes(false)
-                                          .Select(x => x.AttributeData.TryGetValue("Template", out var value) ? (string)value : null)
+                                          .Select(x => x.AttributeData.TryGetValue("Template", out var value) ? (string?)value : null)
                                           .SingleOrDefault(x => !string.IsNullOrEmpty(x));
             return AppendRoutePrefix(routeTemplate ?? string.Empty, controllerType);
         }

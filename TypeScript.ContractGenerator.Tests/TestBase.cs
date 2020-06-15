@@ -22,7 +22,8 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests
         protected static IRootTypesProvider GetTypesProvider<TTypesProvider>(params Type[] rootTypes)
             where TTypesProvider : IRootTypesProvider
         {
-            return (IRootTypesProvider)Activator.CreateInstance(typeof(TTypesProvider), rootTypes);
+            // ReSharper disable once CoVariantArrayConversion
+            return (IRootTypesProvider)Activator.CreateInstance(typeof(TTypesProvider), rootTypes)!;
         }
 
         protected static void GenerateFiles(ICustomTypeGenerator customTypeGenerator, string folderName, IRootTypesProvider typesProvider)
@@ -69,8 +70,8 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests
                 actual.Diff(expected).ShouldBeEmpty();
             }
 
-            var expectedDirectories = new string[0];
-            var actualDirectories = new string[0];
+            var expectedDirectories = new string?[0];
+            var actualDirectories = new string?[0];
             if (Directory.Exists(expectedDirectory))
                 expectedDirectories = Directory.EnumerateDirectories(expectedDirectory).Select(Path.GetFileName).ToArray();
             if (Directory.Exists(actualDirectory))

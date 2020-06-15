@@ -31,7 +31,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests
                              .AddDocument("ApiControllerTypeBuildingContext.cs", File.ReadAllText(GetFilePath("ApiControllerTypeBuildingContext.txt")))
                              .Project;
 
-            var compilation = project.GetCompilationAsync().GetAwaiter().GetResult()
+            var compilation = project.GetCompilationAsync().GetAwaiter().GetResult()!
                                      .AddReferences(GetMetadataReferences())
                                      .AddReferences(MetadataReference.CreateFromFile(typeof(ControllerBase).Assembly.Location));
 
@@ -49,8 +49,8 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests
             str.Diff(expectedCode).ShouldBeEmpty();
 
             var assembly = CompileAssembly(result.SyntaxTree);
-            var buildingContext = assembly.GetType("AspNetCoreExample.Generator.ApiControllerTypeBuildingContext");
-            var acceptMethod = buildingContext.GetMethod("Accept", BindingFlags.Public | BindingFlags.Static);
+            var buildingContext = assembly.GetType("AspNetCoreExample.Generator.ApiControllerTypeBuildingContext")!;
+            var acceptMethod = buildingContext.GetMethod("Accept", BindingFlags.Public | BindingFlags.Static)!;
 
             acceptMethod.Invoke(null, new object[] {TypeInfo.From<bool>()}).Should().Be(false);
             acceptMethod.Invoke(null, new object[] {TypeInfo.From<UsersController>()}).Should().Be(true);
@@ -76,7 +76,7 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests
         private static MetadataReference[] GetMetadataReferences()
         {
             var types = new[] {typeof(object), typeof(Enumerable), typeof(ISet<>), typeof(HashSet<>), typeof(TypeInfo), typeof(RoslynTypeInfo)};
-            var netstandardLocation = Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "netstandard.dll");
+            var netstandardLocation = Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location)!, "netstandard.dll");
             var locations = types.Select(x => x.Assembly.Location).Concat(new[] {netstandardLocation}).Distinct();
             return locations.Select(x => (MetadataReference)MetadataReference.CreateFromFile(x)).ToArray();
         }

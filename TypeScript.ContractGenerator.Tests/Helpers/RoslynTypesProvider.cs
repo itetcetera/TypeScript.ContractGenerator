@@ -18,8 +18,8 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests.Helpers
         public RoslynTypesProvider(params Type[] rootTypes)
         {
             this.rootTypes = rootTypes;
-            project = AdhocProject.FromDirectory(TestContext.CurrentContext.TestDirectory + "/../../../Types");
-            compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
+            var project = AdhocProject.FromDirectory(TestContext.CurrentContext.TestDirectory + "/../../../Types");
+            compilation = project.GetCompilationAsync().GetAwaiter().GetResult()!;
             var coreTypes = new[] {typeof(object), typeof(HashSet<>), typeof(ContractGeneratorIgnoreAttribute)};
             var assemblies = coreTypes.Select(x => x.Assembly.Location).ToArray();
             compilation = compilation.AddReferences(assemblies.Select(x => MetadataReference.CreateFromFile(x)));
@@ -29,10 +29,9 @@ namespace SkbKontur.TypeScript.ContractGenerator.Tests.Helpers
 
         public ITypeInfo[] GetRootTypes()
         {
-            return rootTypes.Select(x => RoslynTypeInfo.From(compilation.GetTypeByMetadataName(x.FullName))).ToArray();
+            return rootTypes.Select(x => RoslynTypeInfo.From(compilation.GetTypeByMetadataName(x.FullName!)!)).ToArray();
         }
 
-        private readonly Project project;
         private readonly Compilation compilation;
         private readonly Type[] rootTypes;
     }
